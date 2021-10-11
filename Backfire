@@ -1,0 +1,31 @@
+@name Backfire
+@inputs BackfireEffect:entity RPM PSI W S
+@outputs On
+@persist RPMMin PSIMin
+
+interval(100)
+
+if(first()){
+    #PSIMin=2
+    RPMMin=4000
+}
+
+Throttle=W||S
+if(RPM>RPMMin){
+    #if(PSI>PSIMin){
+    if(!Throttle){
+        Rand=randint(1,5)
+        if(Rand==3){
+        BackfireEffect:soundPlay("backfire",0,"weapons/ar1/ar1_dist1.wav")
+        timer("backfire",100)
+        }
+    }
+    #}
+}
+if(clk("backfire")){
+    On=1
+    timer("stop",50)
+}
+if(clk("stop")){
+    On=0
+}
