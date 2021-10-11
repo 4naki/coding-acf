@@ -1,0 +1,63 @@
+@name ACF controller by Naki
+@inputs W S GearUp GearDown CurGear Space Seat:entity Shift
+@outputs Throttle Gear Brake PowerOn Clutch
+@persist Override Clutch GasMultip Gear ReverseGear SaveGear PowerOn Gas
+interval(100)
+Active=Seat:driver()
+Brake=Space||S
+if(first()){
+    Gear=0
+    SaveGear=0
+    
+    #editable values
+    
+    GasMultip=60
+    ReverseGear=6
+}
+
+if(changed(GearUp)&GearUp){
+    timer("throttle",150)
+    Override=0
+    Clutch=1
+    if(Gear<5){
+        Gear=Gear+1
+    }
+    SaveGear=Gear
+}elseif(changed(GearDown)&GearDown){
+    timer("throttle",150)
+    Override=0
+    Clutch=1
+    if(Gear>0){
+        Gear=Gear-1
+    }
+    SaveGear=Gear
+}elseif(S){
+    Throttle=S*GasMultip
+    Gear=ReverseGear
+}else{
+    Gear=SaveGear
+}
+
+if(changed(Active)&Active){
+    Seat:driver():soundPlay(1,0,"acf_extra/vehiclefx/starters/starter1.wav")
+    timer("start",1450)
+    timer("releaseGas",1750)
+    Gas=1
+}
+if(!Active){
+    PowerOn=0
+}
+if(clk("start")){
+    PowerOn=1
+}
+if(clk("releaseGas")){
+    Gas=0
+}
+if(Gas){
+    Throttle=GasMultip/3
+}
+if(clk("throttle")){
+Override=1
+Clutch=0
+}
+Throttle=W*(GasMultip*Override)+(21*(Shift*W))*Override
